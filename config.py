@@ -1,0 +1,9 @@
+TOKEN = "TU_TOKEN_AQUI"
+
+LOG_FILE = "logs.txt"
+QUEUE_FILE = "queue.json"
+
+WEB_HOST = "0.0.0.0"
+WEB_PORT = 5000
+
+ADMIN_ID = 123456789
