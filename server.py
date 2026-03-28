@@ -1,163 +1,68 @@
-from flask import Flask, request, jsonify
+# 💀 MP SERVER ULTRA STABLE + OPTIMIZED
+
+from flask import Flask, jsonify, request
 from flask_socketio import SocketIO, emit
-import time
-from config import config
+import config
 
+# 🚀 APP INIT
 app = Flask(__name__)
-socketio = SocketIO(app, cors_allowed_origins=config.socket.cors)
+app.config["SECRET_KEY"] = config.API_TOKEN
 
-# 💾 MEMORY FAST
-private_chats = {}
-logs = []
+socketio = SocketIO(app, cors_allowed_origins="*")
 
-
-# 🔐 AUTH CHECK
-def auth():
-    return request.headers.get("Authorization") == config.auth.api_token
-
-
-# 📜 LOG SYSTEM
-def log(msg):
-    line = f"[{time.strftime('%H:%M:%S')}] {msg}"
-    logs.append(line)
-    socketio.emit("log", line)
-
-
-# =========================
-# 💬 PRIVATE CHAT
-# =========================
-@app.route("/api/private/send", methods=["POST"])
-def private_send():
-
-    if not auth():
-        return jsonify({"error": "unauthorized"}), 403
-
-    data = request.json
-    sender = data["from"]
-    to = data["to"]
-    msg = data["message"]
-
-    chat_id = f"{min(sender,to)}-{max(sender,to)}"
-
-    if chat_id not in private_chats:
-        private_chats[chat_id] = []
-
-    message = {
-        "from": sender,
-        "to": to,
-        "message": msg,
-        "time": time.strftime("%H:%M:%S")
-    }
-
-    private_chats[chat_id].append(message)
-
-    log(f"PM {sender}->{to}: {msg}")
-
-    socketio.emit("private_message", message)
-
-    return jsonify({"status": "ok", "data": message})
-
-
-# =========================
-# 💬 GROUP CHAT
-# =========================
-@app.route("/api/group/send", methods=["POST"])
-def group_send():
-
-    if not auth():
-        return jsonify({"error": "unauthorized"}), 403
-
-    data = request.json
-    group_id = data["group_id"]
-    sender = data["from"]
-    msg = data["message"]
-
-    message = {
-        "from": sender,
-        "message": msg,
-        "time": time.strftime("%H:%M:%S")
-    }
-
-    config.groups.groups[group_id]["messages"].append(message)
-
-    log(f"GROUP {group_id} {sender}: {msg}")
-
-    socketio.emit("group_message", {
-        "group_id": group_id,
-        "data": message
+# 📡 HOME
+@app.route("/")
+def home():
+    return jsonify({
+        "status": "ok",
+        "server": "MP SYSTEM ACTIVE",
+        "host": config.HOST,
+        "port": config.PORT
     })
 
-    return jsonify({"status": "ok", "data": message})
-
-
-# =========================
-# 👤 USERS
-# =========================
-@app.route("/api/users")
-def users():
-    if not auth():
-        return jsonify({"error": "unauthorized"}), 403
-    return jsonify(config.users.users)
-
-
-# =========================
-# 💬 GROUPS
-# =========================
-@app.route("/api/groups")
-def groups():
-    if not auth():
-        return jsonify({"error": "unauthorized"}), 403
-    return jsonify(config.groups.groups)
-
-
-# =========================
-# 📜 LOGS
-# =========================
-@app.route("/api/logs")
-def get_logs():
-    if not auth():
-        return jsonify({"error": "unauthorized"}), 403
-    return jsonify(logs[-100:])
-
-
-# =========================
-# 🔐 LOGIN
-# =========================
-@app.route("/api/login", methods=["POST"])
+# 🔐 LOGIN SIMPLE
+@app.route("/login", methods=["POST"])
 def login():
     data = request.json
 
-    if data["user"] == config.auth.admin_user and data["password"] == config.auth.admin_pass:
-        return jsonify({
-            "status": "ok",
-            "token": config.auth.api_token
-        })
+    user = data.get("user")
+    password = data.get("password")
 
-    return jsonify({"status": "error"}), 401
+    if user == config.ADMIN_USER and password == config.ADMIN_PASS:
+        return jsonify({"status": "success", "token": config.API_TOKEN})
 
+    return jsonify({"status": "error", "message": "invalid credentials"}), 401
 
-# =========================
-# 🔌 SOCKET EVENTS
-# =========================
+# 💬 SOCKET CONNECT
 @socketio.on("connect")
 def connect():
-    log("USER CONNECTED")
-    emit("status", {"msg": "connected"})
+    emit("status", {"message": "connected to MP system"})
 
-
-@socketio.on("send_message")
-def socket_msg(data):
-    log(f"SOCKET: {data}")
+# 💬 CHAT MESSAGE
+@socketio.on("message")
+def handle_message(data):
+    print("MSG:", data)
     emit("message", data, broadcast=True)
 
+# 📊 USERS LIST
+@app.route("/users")
+def users():
+    return jsonify(config.USERS)
 
-# =========================
-# 🚀 START SERVER
-# =========================
+# 💀 GROUPS
+@app.route("/groups")
+def groups():
+    return jsonify(config.GROUPS)
+
+# ⚡ RUN SERVER
 if __name__ == "__main__":
+    print("💀 MP SERVER STARTING...")
+    print(f"HOST: {config.HOST}")
+    print(f"PORT: {config.PORT}")
+
     socketio.run(
         app,
-        host=config.server.host,
-        port=config.server.port,
-        debug=config.server.debug
+        host=config.HOST,
+        port=config.PORT,
+        debug=config.DEBUG
     )
