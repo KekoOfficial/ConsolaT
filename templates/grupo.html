@@ -1,119 +1,81 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>GRUPOS - ConsolaT</title>
+<title>Panel Grupos</title>
 
 <style>
-body{
-    margin:0;
-    font-family:Arial;
-    background:#0a0a0a;
-    color:white;
-}
+body{background:#0a0a0a;color:white;font-family:Arial;margin:0}
 
-/* HEADER */
 .header{
+    background:#111;
+    padding:15px;
     display:flex;
     justify-content:space-between;
-    align-items:center;
-    padding:10px;
-    background:#111;
-    border-bottom:1px solid #222;
 }
 
-.header h2{
-    margin:0;
-    color:#ff0055;
-}
-
-.header button{
-    padding:8px 12px;
-    background:#ff0055;
-    border:none;
-    border-radius:8px;
-    color:white;
-    cursor:pointer;
-}
-
-/* CONTENEDOR */
 .container{
     display:flex;
-    height:calc(100vh - 60px);
+    height:90vh;
 }
 
-/* IZQUIERDA */
-.left{
-    width:35%;
-    padding:15px;
-    border-right:1px solid #222;
-}
-
-/* DERECHA */
-.right{
-    width:65%;
-    padding:15px;
-}
-
-/* INPUTS */
-input,textarea{
-    width:100%;
+.list{
+    width:30%;
+    background:#111;
+    overflow:auto;
     padding:10px;
-    margin:6px 0;
-    background:#1a1a1a;
-    border:none;
-    border-radius:8px;
-    color:white;
 }
 
-/* BOTONES */
-button.send{
-    width:100%;
-    padding:12px;
-    margin-top:10px;
-    background:#ff0055;
-    border:none;
+.chat{
+    padding:10px;
+    margin-bottom:8px;
+    background:#1a1a1a;
     border-radius:10px;
-    color:white;
-    font-weight:bold;
     cursor:pointer;
 }
 
-button.send:hover{
-    background:#ff3366;
+.chat:hover{background:#333}
+
+.main{
+    width:70%;
+    display:flex;
+    flex-direction:column;
 }
 
-/* ESTADO */
-.status{
-    margin-top:10px;
-    font-size:13px;
-    color:#00ff88;
-}
-
-/* LOGS */
 .logs{
-    height:100%;
-    background:#111;
-    padding:10px;
-    border-radius:10px;
+    flex:1;
     overflow:auto;
-    font-size:13px;
-    white-space:pre-wrap;
+    padding:10px;
 }
 
-/* MENSAJE BURBUJA */
 .msg{
-    margin-bottom:8px;
+    margin:5px 0;
     padding:8px;
-    background:#1f1f1f;
+    background:#1a1a1a;
+    border-radius:10px;
+}
+
+.input{
+    padding:10px;
+    background:#111;
+}
+
+textarea,input{
+    width:100%;
+    padding:10px;
+    margin:5px 0;
+    background:#222;
+    border:none;
     border-radius:8px;
+    color:white;
 }
 
-.bot{
-    color:#00ff88;
-}
-
-.user{
-    color:#00aaff;
+button{
+    padding:10px;
+    background:#ff0055;
+    border:none;
+    border-radius:8px;
+    cursor:pointer;
+    width:100%;
 }
 </style>
 
@@ -122,69 +84,51 @@ button.send:hover{
 <body>
 
 <div class="header">
-    <h2>👥 PANEL GRUPOS</h2>
-    <div>
-        <button onclick="goPrivado()">💬 Privado</button>
-        <button onclick="location.reload()">🔄</button>
-    </div>
+<h3>👥 Grupos</h3>
+<a href="/" style="color:#0f0">Ir a Privados</a>
 </div>
 
 <div class="container">
 
-<!-- IZQUIERDA -->
-<div class="left">
+<div class="list" id="chatList"></div>
 
-<h3>📤 Enviar mensaje</h3>
-
-<input id="id" placeholder="-100 ID grupo">
-<input id="cc" placeholder="CC (opcional)">
-<textarea id="msg" placeholder="Escribe el mensaje..."></textarea>
-
-<button class="send" onclick="send()">ENVIAR</button>
-
-<div class="status" id="status">● Esperando...</div>
-
-</div>
-
-<!-- DERECHA -->
-<div class="right">
-
-<h3>📡 Chat / Logs en vivo</h3>
+<div class="main">
 
 <div class="logs" id="logs"></div>
 
+<div class="input">
+<input id="id" placeholder="ID grupo">
+<textarea id="msg"></textarea>
+<input type="file" id="file">
+<button onclick="send()">Enviar</button>
 </div>
 
+</div>
 </div>
 
 <script>
-function goPrivado(){
-    window.location.href="/";
-}
 
-// ENVIAR
-async function send(){
-    let id=document.getElementById("id").value;
-    let cc=document.getElementById("cc").value;
-    let msg=document.getElementById("msg").value;
+// MISMO JS (reutilizado)
+async function loadChats(){
+    let res = await fetch("/chats");
+    let data = await res.json();
 
-    if(!id || !msg){
-        alert("Completa ID y mensaje");
-        return;
+    let html="";
+    for(let id in data){
+        html += `
+        <div class="chat" onclick="selectChat('${id}')">
+            👥 ${data[id]}<br>
+            <small>${id}</small>
+        </div>`;
     }
 
-    document.getElementById("status").innerText="⏳ Enviando...";
-
-    await fetch("/send",{
-        method:"POST",
-        headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({id,cc,msg})
-    });
-
-    document.getElementById("status").innerText="✅ Enviado";
+    document.getElementById("chatList").innerHTML = html;
 }
 
-// LOGS EN VIVO
+function selectChat(id){
+    document.getElementById("id").value = id;
+}
+
 async function loadLogs(){
     let res = await fetch("/logs");
     let data = await res.json();
@@ -192,23 +136,63 @@ async function loadLogs(){
     let html="";
 
     data.logs.forEach(line=>{
-        if(line.includes("BOT")){
-            html += `<div class="msg bot">${line}</div>`;
-        }else{
-            html += `<div class="msg user">${line}</div>`;
+
+        if(line.includes("[FOTO]")){
+            let url=line.split("[FOTO]")[1].trim();
+            html+=`<div class="msg">📸<br><img src="${url}" width="200"></div>`;
         }
+
+        else if(line.includes("[VIDEO]")){
+            let url=line.split("[VIDEO]")[1].trim();
+            html+=`<div class="msg">🎥<video controls width="200"><source src="${url}"></video></div>`;
+        }
+
+        else if(line.includes("[VOZ]") || line.includes("[AUDIO]")){
+            let url=line.split("]")[1].trim();
+            html+=`<div class="msg">🎧<audio controls><source src="${url}"></audio></div>`;
+        }
+
+        else{
+            html+=`<div class="msg">${line}</div>`;
+        }
+
     });
 
-    document.getElementById("logs").innerHTML = html;
-
-    // AUTO SCROLL
-    let box = document.getElementById("logs");
-    box.scrollTop = box.scrollHeight;
+    let box=document.getElementById("logs");
+    box.innerHTML=html;
+    box.scrollTop=box.scrollHeight;
 }
 
-// AUTO REFRESH
-setInterval(loadLogs, 2000);
+async function send(){
+
+    let id=document.getElementById("id").value;
+    let msg=document.getElementById("msg").value;
+    let fileInput=document.getElementById("file");
+
+    let fileUrl="";
+
+    if(fileInput.files.length>0){
+        let form=new FormData();
+        form.append("file", fileInput.files[0]);
+
+        let res=await fetch("/upload",{method:"POST",body:form});
+        let data=await res.json();
+        fileUrl=data.url;
+    }
+
+    await fetch("/send",{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({id,msg,file:fileUrl})
+    });
+}
+
+setInterval(loadLogs,2000);
+setInterval(loadChats,5000);
+
 loadLogs();
+loadChats();
+
 </script>
 
 </body>
