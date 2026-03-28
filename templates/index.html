@@ -1,16 +1,17 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Panel Privado</title>
+<title>Panel Chat PRO</title>
 
 <style>
 body{
-    background:#0a0a0a;
-    color:white;
-    font-family:Arial;
     margin:0;
+    font-family:Arial;
+    background:#0b0b0b;
+    color:white;
 }
 
+/* HEADER */
 .header{
     background:#111;
     padding:15px;
@@ -18,60 +19,76 @@ body{
     justify-content:space-between;
 }
 
+/* LAYOUT */
 .container{
     display:flex;
-    height:90vh;
+    height:92vh;
 }
 
-/* LISTA */
-.list{
+/* LISTA CHATS */
+.left{
     width:30%;
     background:#111;
     overflow:auto;
-    padding:10px;
+    border-right:1px solid #222;
 }
 
-.chat{
-    padding:10px;
-    margin-bottom:8px;
-    background:#1a1a1a;
-    border-radius:10px;
+.chatItem{
+    padding:12px;
+    border-bottom:1px solid #222;
     cursor:pointer;
 }
 
-.chat:hover{background:#333}
+.chatItem:hover{
+    background:#222;
+}
 
-/* PANEL */
-.main{
+/* CHAT AREA */
+.right{
     width:70%;
     display:flex;
     flex-direction:column;
 }
 
-/* LOG */
+/* LOGS */
 .logs{
     flex:1;
-    overflow:auto;
     padding:10px;
+    overflow:auto;
 }
 
+/* MENSAJES */
 .msg{
-    margin:5px 0;
-    padding:8px;
-    background:#1a1a1a;
-    border-radius:10px;
+    max-width:70%;
+    padding:10px;
+    margin:5px;
+    border-radius:12px;
+    word-wrap:break-word;
+}
+
+/* IZQUIERDA */
+.leftMsg{
+    background:#222;
+    align-self:flex-start;
+}
+
+/* DERECHA (TÚ) */
+.rightMsg{
+    background:#0055ff;
+    align-self:flex-end;
+    margin-left:auto;
 }
 
 /* INPUT */
-.input{
-    padding:10px;
+.inputBox{
     background:#111;
+    padding:10px;
 }
 
-textarea,input{
+input, textarea{
     width:100%;
-    padding:10px;
     margin:5px 0;
+    padding:10px;
     background:#222;
     border:none;
     border-radius:8px;
@@ -79,12 +96,16 @@ textarea,input{
 }
 
 button{
+    width:100%;
     padding:10px;
     background:#00ff88;
     border:none;
     border-radius:8px;
     cursor:pointer;
-    width:100%;
+}
+
+small{
+    color:#888;
 }
 </style>
 
@@ -93,39 +114,47 @@ button{
 <body>
 
 <div class="header">
-<h3>💬 Privados</h3>
-<a href="/grupo" style="color:#0f0">Ir a Grupos</a>
+<h3>💬 Chat PRO</h3>
+<a href="/grupo" style="color:#0f0">Grupos</a>
 </div>
 
 <div class="container">
 
-<div class="list" id="chatList"></div>
+<!-- CHATS -->
+<div class="left" id="chatList"></div>
 
-<div class="main">
+<!-- CHAT -->
+<div class="right">
 
 <div class="logs" id="logs"></div>
 
-<div class="input">
-<input id="id" placeholder="ID automático">
-<textarea id="msg"></textarea>
+<div class="inputBox">
+<input id="chatId" placeholder="ID chat">
+<textarea id="msg" placeholder="Escribe..."></textarea>
 <input type="file" id="file">
 <button onclick="send()">Enviar</button>
 </div>
 
 </div>
+
 </div>
 
 <script>
 
+let currentChat = null;
+
+// =====================
 // CARGAR CHATS
+// =====================
 async function loadChats(){
     let res = await fetch("/chats");
     let data = await res.json();
 
     let html="";
+
     for(let id in data){
         html += `
-        <div class="chat" onclick="selectChat('${id}')">
+        <div class="chatItem" onclick="openChat('${id}')">
             👤 ${data[id]}<br>
             <small>${id}</small>
         </div>`;
@@ -134,13 +163,19 @@ async function loadChats(){
     document.getElementById("chatList").innerHTML = html;
 }
 
-// SELECCIONAR
-function selectChat(id){
-    document.getElementById("id").value = id;
+// =====================
+// ABRIR CHAT
+// =====================
+function openChat(id){
+    currentChat = id;
+    document.getElementById("chatId").value = id;
 }
 
+// =====================
 // LOGS
+// =====================
 async function loadLogs(){
+
     let res = await fetch("/logs");
     let data = await res.json();
 
@@ -148,60 +183,99 @@ async function loadLogs(){
 
     data.logs.forEach(line=>{
 
+        let isMe = line.includes("TÚ:");
+
+        let style = isMe ? "rightMsg" : "leftMsg";
+
+        // FOTO
         if(line.includes("[FOTO]")){
-            let url=line.split("[FOTO]")[1].trim();
-            html+=`<div class="msg">📸<br><img src="${url}" style="max-width:200px"></div>`;
+            let url = line.split("[FOTO]")[1].trim();
+            html += `
+            <div class="msg ${style}">
+                📸<br>
+                <img src="${url}" style="max-width:100%;border-radius:10px">
+            </div>`;
         }
 
+        // VIDEO
         else if(line.includes("[VIDEO]")){
-            let url=line.split("[VIDEO]")[1].trim();
-            html+=`<div class="msg">🎥<video controls width="200"><source src="${url}"></video></div>`;
+            let url = line.split("[VIDEO]")[1].trim();
+            html += `
+            <div class="msg ${style}">
+                🎥<br>
+                <video controls style="max-width:100%">
+                    <source src="${url}">
+                </video>
+            </div>`;
         }
 
+        // AUDIO
         else if(line.includes("[VOZ]") || line.includes("[AUDIO]")){
-            let url=line.split("]")[1].trim();
-            html+=`<div class="msg">🎧<audio controls><source src="${url}"></audio></div>`;
+            let url = line.split("]")[1].trim();
+            html += `
+            <div class="msg ${style}">
+                🎧<br>
+                <audio controls>
+                    <source src="${url}">
+                </audio>
+            </div>`;
         }
 
+        // TEXTO
         else{
-            html+=`<div class="msg">${line}</div>`;
+            html += `<div class="msg ${style}">${line}</div>`;
         }
 
     });
 
-    let box=document.getElementById("logs");
-    box.innerHTML=html;
-    box.scrollTop=box.scrollHeight;
+    let box = document.getElementById("logs");
+    box.innerHTML = html;
+    box.scrollTop = box.scrollHeight;
 }
 
+// =====================
 // ENVIAR
+// =====================
 async function send(){
 
-    let id=document.getElementById("id").value;
-    let msg=document.getElementById("msg").value;
-    let fileInput=document.getElementById("file");
+    let id = document.getElementById("chatId").value;
+    let msg = document.getElementById("msg").value;
+    let fileInput = document.getElementById("file");
 
-    let fileUrl="";
+    let fileUrl = "";
 
-    if(fileInput.files.length>0){
-        let form=new FormData();
+    if(fileInput.files.length > 0){
+
+        let form = new FormData();
         form.append("file", fileInput.files[0]);
 
-        let res=await fetch("/upload",{method:"POST",body:form});
-        let data=await res.json();
-        fileUrl=data.url;
+        let res = await fetch("/upload",{
+            method:"POST",
+            body:form
+        });
+
+        let data = await res.json();
+        fileUrl = data.url;
     }
 
     await fetch("/send",{
         method:"POST",
         headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({id,msg,file:fileUrl})
+        body:JSON.stringify({
+            id:id,
+            msg:msg,
+            file:fileUrl
+        })
     });
+
+    document.getElementById("msg").value="";
 }
 
-// AUTO
-setInterval(loadLogs,2000);
-setInterval(loadChats,5000);
+// =====================
+// AUTO UPDATE
+// =====================
+setInterval(loadLogs, 800);
+setInterval(loadChats, 3000);
 
 loadLogs();
 loadChats();
