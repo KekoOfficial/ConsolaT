@@ -1,6 +1,6 @@
 import asyncio
 import os
-from threading import Thread
+import threading
 from flask import Flask, request, jsonify, render_template
 
 from telegram import Update
@@ -9,6 +9,7 @@ from telegram.ext import Application, MessageHandler, ContextTypes, filters
 from config import TOKEN, LOG_FILE, WEB_HOST, WEB_PORT
 
 app = Flask(__name__)
+
 tg_app = Application.builder().token(TOKEN).build()
 
 # =========================
@@ -25,7 +26,7 @@ def load_logs():
     return []
 
 # =========================
-# 🤖 MENSAJES ENTRANTES
+# 🤖 MENSAJES RECIBIDOS
 # =========================
 
 async def recibir(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -44,16 +45,8 @@ async def recibir(update: Update, context: ContextTypes.DEFAULT_TYPE):
 tg_app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, recibir))
 
 # =========================
-# 📡 ENVIAR MENSAJES
+# 📡 ENVIAR MENSAJE (FIX ESTABLE)
 # =========================
-
-@app.route("/send", methods=["POST"])
-def send():
-    data = request.json
-
-    asyncio.run(send_async(data))
-
-    return jsonify({"status": "ok"})
 
 async def send_async(data):
     try:
@@ -66,7 +59,7 @@ async def send_async(data):
         print(line)
         save_log(line)
 
-        # 💀 CC (opcional)
+        # 💀 CC OPCIONAL
         if data.get("cc"):
             await tg_app.bot.send_message(
                 chat_id=int(data["cc"]),
@@ -78,10 +71,19 @@ async def send_async(data):
             save_log(line2)
 
     except Exception as e:
-        print("❌ ERROR:", e)
+        print("❌ ERROR SEND:", e)
+
+@app.route("/send", methods=["POST"])
+def send():
+    data = request.json
+
+    # 🔥 FIX IMPORTANTE: thread (NO rompe Flask)
+    threading.Thread(target=lambda: asyncio.run(send_async(data))).start()
+
+    return jsonify({"status": "ok"})
 
 # =========================
-# 🏠 PÁGINAS
+# 🌐 PÁGINAS
 # =========================
 
 @app.route("/")
@@ -113,18 +115,18 @@ async def bot_run():
         await asyncio.sleep(10)
 
 # =========================
-# 🌐 WEB
+# 🌐 FLASK
 # =========================
 
 def run_web():
-    app.run(host=WEB_HOST, port=WEB_PORT)
+    app.run(host=WEB_HOST, port=WEB_PORT, debug=False)
 
 # =========================
 # 🚀 MAIN
 # =========================
 
 async def main():
-    Thread(target=run_web).start()
+    threading.Thread(target=run_web).start()
     await bot_run()
 
 if __name__ == "__main__":
