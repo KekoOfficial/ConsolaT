@@ -1,156 +1,163 @@
 from flask import Flask, request, jsonify
 from flask_socketio import SocketIO, emit
 import time
-import config
+from config import config
 
 app = Flask(__name__)
-socketio = SocketIO(app, cors_allowed_origins=config.SOCKET_CORS)
+socketio = SocketIO(app, cors_allowed_origins=config.socket.cors)
 
-# 💾 MEMORY SYSTEM (FAST ACCESS)
-users = config.USERS
-groups = config.GROUPS
+# 💾 MEMORY FAST
 private_chats = {}
 logs = []
 
 
-# ⚡ UTIL: TOKEN CHECK (FAST)
+# 🔐 AUTH CHECK
 def auth():
-    return request.headers.get("Authorization") == config.API_TOKEN
+    return request.headers.get("Authorization") == config.auth.api_token
 
 
-# 📜 ULTRA LOG SYSTEM
+# 📜 LOG SYSTEM
 def log(msg):
-    data = f"[{time.strftime('%H:%M:%S')}] {msg}"
-    logs.append(data)
-    socketio.emit("log", data)
+    line = f"[{time.strftime('%H:%M:%S')}] {msg}"
+    logs.append(line)
+    socketio.emit("log", line)
 
 
-# 💬 PRIVATE CHAT (ULTRA FAST)
+# =========================
+# 💬 PRIVATE CHAT
+# =========================
 @app.route("/api/private/send", methods=["POST"])
 def private_send():
 
     if not auth():
         return jsonify({"error": "unauthorized"}), 403
 
-    d = request.json
-    sender = d["from"]
-    to = d["to"]
-    msg = d["message"]
+    data = request.json
+    sender = data["from"]
+    to = data["to"]
+    msg = data["message"]
 
     chat_id = f"{min(sender,to)}-{max(sender,to)}"
 
     if chat_id not in private_chats:
         private_chats[chat_id] = []
 
-    data = {
+    message = {
         "from": sender,
         "to": to,
         "message": msg,
         "time": time.strftime("%H:%M:%S")
     }
 
-    private_chats[chat_id].append(data)
+    private_chats[chat_id].append(message)
 
     log(f"PM {sender}->{to}: {msg}")
 
-    socketio.emit("private_message", data)
+    socketio.emit("private_message", message)
 
-    return jsonify({"status": "ok", "data": data})
+    return jsonify({"status": "ok", "data": message})
 
 
-# 💬 GROUP CHAT (FAST PUSH)
+# =========================
+# 💬 GROUP CHAT
+# =========================
 @app.route("/api/group/send", methods=["POST"])
 def group_send():
 
     if not auth():
         return jsonify({"error": "unauthorized"}), 403
 
-    d = request.json
-    group_id = d["group_id"]
-    sender = d["from"]
-    msg = d["message"]
+    data = request.json
+    group_id = data["group_id"]
+    sender = data["from"]
+    msg = data["message"]
 
-    data = {
+    message = {
         "from": sender,
         "message": msg,
         "time": time.strftime("%H:%M:%S")
     }
 
-    groups[group_id]["messages"].append(data)
+    config.groups.groups[group_id]["messages"].append(message)
 
     log(f"GROUP {group_id} {sender}: {msg}")
 
     socketio.emit("group_message", {
         "group_id": group_id,
-        "data": data
+        "data": message
     })
 
-    return jsonify({"status": "ok", "data": data})
+    return jsonify({"status": "ok", "data": message})
 
 
+# =========================
 # 👤 USERS
+# =========================
 @app.route("/api/users")
-def get_users():
+def users():
     if not auth():
         return jsonify({"error": "unauthorized"}), 403
-    return jsonify(users)
+    return jsonify(config.users.users)
 
 
+# =========================
 # 💬 GROUPS
+# =========================
 @app.route("/api/groups")
-def get_groups():
+def groups():
     if not auth():
         return jsonify({"error": "unauthorized"}), 403
-    return jsonify(groups)
+    return jsonify(config.groups.groups)
 
 
-# 📜 LOGS (MP CONTROL CENTER)
+# =========================
+# 📜 LOGS
+# =========================
 @app.route("/api/logs")
 def get_logs():
     if not auth():
         return jsonify({"error": "unauthorized"}), 403
-    return jsonify(logs[-100:])  # solo últimos 100 (rápido)
+    return jsonify(logs[-100:])
 
 
-# 💬 PRIVATE HISTORY
-@app.route("/api/private/<chat_id>")
-def private_history(chat_id):
-    if not auth():
-        return jsonify({"error": "unauthorized"}), 403
-    return jsonify(private_chats.get(chat_id, []))
-
-
-# 🔐 LOGIN ADMIN
+# =========================
+# 🔐 LOGIN
+# =========================
 @app.route("/api/login", methods=["POST"])
 def login():
-    d = request.json
+    data = request.json
 
-    if d["user"] == config.ADMIN_USER and d["password"] == config.ADMIN_PASS:
-        return jsonify({"status": "ok", "token": config.API_TOKEN})
+    if data["user"] == config.auth.admin_user and data["password"] == config.auth.admin_pass:
+        return jsonify({
+            "status": "ok",
+            "token": config.auth.api_token
+        })
 
     return jsonify({"status": "error"}), 401
 
 
-# 🔌 SOCKET CONNECT
+# =========================
+# 🔌 SOCKET EVENTS
+# =========================
 @socketio.on("connect")
 def connect():
     log("USER CONNECTED")
     emit("status", {"msg": "connected"})
 
 
-# 🔌 SOCKET MESSAGE (GLOBAL REALTIME)
 @socketio.on("send_message")
 def socket_msg(data):
-    log(f"SOCKET MSG: {data}")
+    log(f"SOCKET: {data}")
     emit("message", data, broadcast=True)
 
 
-# 🚀 START SERVER (FAST MODE)
+# =========================
+# 🚀 START SERVER
+# =========================
 if __name__ == "__main__":
     socketio.run(
         app,
-        host=config.HOST,
-        port=config.PORT,
-        debug=config.DEBUG,
-        allow_unsafe_werkzeug=True
+        host=config.server.host,
+        port=config.server.port,
+        debug=config.server.debug
     )
