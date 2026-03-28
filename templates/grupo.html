@@ -1,199 +1,29 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Panel Grupos</title>
-
-<style>
-body{background:#0a0a0a;color:white;font-family:Arial;margin:0}
-
-.header{
-    background:#111;
-    padding:15px;
-    display:flex;
-    justify-content:space-between;
-}
-
-.container{
-    display:flex;
-    height:90vh;
-}
-
-.list{
-    width:30%;
-    background:#111;
-    overflow:auto;
-    padding:10px;
-}
-
-.chat{
-    padding:10px;
-    margin-bottom:8px;
-    background:#1a1a1a;
-    border-radius:10px;
-    cursor:pointer;
-}
-
-.chat:hover{background:#333}
-
-.main{
-    width:70%;
-    display:flex;
-    flex-direction:column;
-}
-
-.logs{
-    flex:1;
-    overflow:auto;
-    padding:10px;
-}
-
-.msg{
-    margin:5px 0;
-    padding:8px;
-    background:#1a1a1a;
-    border-radius:10px;
-}
-
-.input{
-    padding:10px;
-    background:#111;
-}
-
-textarea,input{
-    width:100%;
-    padding:10px;
-    margin:5px 0;
-    background:#222;
-    border:none;
-    border-radius:8px;
-    color:white;
-}
-
-button{
-    padding:10px;
-    background:#ff0055;
-    border:none;
-    border-radius:8px;
-    cursor:pointer;
-    width:100%;
-}
-</style>
-
+  <title>GRUPOS</title>
+  <style>
+    body{margin:0;background:#0f0f0f;color:#fff;font-family:Arial}
+    .top{background:#1a1a1a;padding:10px;display:flex;gap:10px}
+    .btn{background:#333;color:#fff;border:0;padding:8px;cursor:pointer}
+    .list{padding:10px}
+    .group{background:#181818;margin:10px 0;padding:10px;cursor:pointer}
+  </style>
 </head>
-
 <body>
 
-<div class="header">
-<h3>👥 Grupos</h3>
-<a href="/" style="color:#0f0">Ir a Privados</a>
+<div class="top">
+  <button class="btn" onclick="location.href='index.html'">Privados</button>
+  <button class="btn" onclick="location.href='dashboard.html'">Panel</button>
 </div>
 
-<div class="container">
+<h2 style="padding:10px;">💬 Grupos</h2>
 
-<div class="list" id="chatList"></div>
-
-<div class="main">
-
-<div class="logs" id="logs"></div>
-
-<div class="input">
-<input id="id" placeholder="ID grupo">
-<textarea id="msg"></textarea>
-<input type="file" id="file">
-<button onclick="send()">Enviar</button>
+<div class="list">
+  <div class="group">🔥 Grupo Familia (ID: 1)</div>
+  <div class="group">💀 Clan Devs (ID: 2)</div>
+  <div class="group">🎮 Gaming (ID: 3)</div>
 </div>
-
-</div>
-</div>
-
-<script>
-
-// MISMO JS (reutilizado)
-async function loadChats(){
-    let res = await fetch("/chats");
-    let data = await res.json();
-
-    let html="";
-    for(let id in data){
-        html += `
-        <div class="chat" onclick="selectChat('${id}')">
-            👥 ${data[id]}<br>
-            <small>${id}</small>
-        </div>`;
-    }
-
-    document.getElementById("chatList").innerHTML = html;
-}
-
-function selectChat(id){
-    document.getElementById("id").value = id;
-}
-
-async function loadLogs(){
-    let res = await fetch("/logs");
-    let data = await res.json();
-
-    let html="";
-
-    data.logs.forEach(line=>{
-
-        if(line.includes("[FOTO]")){
-            let url=line.split("[FOTO]")[1].trim();
-            html+=`<div class="msg">📸<br><img src="${url}" width="200"></div>`;
-        }
-
-        else if(line.includes("[VIDEO]")){
-            let url=line.split("[VIDEO]")[1].trim();
-            html+=`<div class="msg">🎥<video controls width="200"><source src="${url}"></video></div>`;
-        }
-
-        else if(line.includes("[VOZ]") || line.includes("[AUDIO]")){
-            let url=line.split("]")[1].trim();
-            html+=`<div class="msg">🎧<audio controls><source src="${url}"></audio></div>`;
-        }
-
-        else{
-            html+=`<div class="msg">${line}</div>`;
-        }
-
-    });
-
-    let box=document.getElementById("logs");
-    box.innerHTML=html;
-    box.scrollTop=box.scrollHeight;
-}
-
-async function send(){
-
-    let id=document.getElementById("id").value;
-    let msg=document.getElementById("msg").value;
-    let fileInput=document.getElementById("file");
-
-    let fileUrl="";
-
-    if(fileInput.files.length>0){
-        let form=new FormData();
-        form.append("file", fileInput.files[0]);
-
-        let res=await fetch("/upload",{method:"POST",body:form});
-        let data=await res.json();
-        fileUrl=data.url;
-    }
-
-    await fetch("/send",{
-        method:"POST",
-        headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({id,msg,file:fileUrl})
-    });
-}
-
-setInterval(loadLogs,2000);
-setInterval(loadChats,5000);
-
-loadLogs();
-loadChats();
-
-</script>
 
 </body>
 </html>
