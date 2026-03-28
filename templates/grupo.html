@@ -1,47 +1,119 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>CHAT GRUPO</title>
+<title>GRUPOS - ConsolaT</title>
 
 <style>
 body{
     margin:0;
     font-family:Arial;
-    background:linear-gradient(135deg,#000,#1a1a1a);
+    background:#0a0a0a;
     color:white;
 }
 
-.container{
-    max-width:500px;
-    margin:50px auto;
-    padding:20px;
+/* HEADER */
+.header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:10px;
     background:#111;
-    border-radius:15px;
+    border-bottom:1px solid #222;
 }
 
-h2{
-    text-align:center;
+.header h2{
+    margin:0;
     color:#ff0055;
 }
 
+.header button{
+    padding:8px 12px;
+    background:#ff0055;
+    border:none;
+    border-radius:8px;
+    color:white;
+    cursor:pointer;
+}
+
+/* CONTENEDOR */
+.container{
+    display:flex;
+    height:calc(100vh - 60px);
+}
+
+/* IZQUIERDA */
+.left{
+    width:35%;
+    padding:15px;
+    border-right:1px solid #222;
+}
+
+/* DERECHA */
+.right{
+    width:65%;
+    padding:15px;
+}
+
+/* INPUTS */
 input,textarea{
     width:100%;
-    padding:12px;
-    margin:8px 0;
-    background:#222;
+    padding:10px;
+    margin:6px 0;
+    background:#1a1a1a;
     border:none;
-    border-radius:10px;
+    border-radius:8px;
     color:white;
 }
 
-button{
+/* BOTONES */
+button.send{
     width:100%;
     padding:12px;
+    margin-top:10px;
     background:#ff0055;
     border:none;
     border-radius:10px;
     color:white;
     font-weight:bold;
+    cursor:pointer;
+}
+
+button.send:hover{
+    background:#ff3366;
+}
+
+/* ESTADO */
+.status{
+    margin-top:10px;
+    font-size:13px;
+    color:#00ff88;
+}
+
+/* LOGS */
+.logs{
+    height:100%;
+    background:#111;
+    padding:10px;
+    border-radius:10px;
+    overflow:auto;
+    font-size:13px;
+    white-space:pre-wrap;
+}
+
+/* MENSAJE BURBUJA */
+.msg{
+    margin-bottom:8px;
+    padding:8px;
+    background:#1f1f1f;
+    border-radius:8px;
+}
+
+.bot{
+    color:#00ff88;
+}
+
+.user{
+    color:#00aaff;
 }
 </style>
 
@@ -49,26 +121,94 @@ button{
 
 <body>
 
+<div class="header">
+    <h2>👥 PANEL GRUPOS</h2>
+    <div>
+        <button onclick="goPrivado()">💬 Privado</button>
+        <button onclick="location.reload()">🔄</button>
+    </div>
+</div>
+
 <div class="container">
-<h2>👥 GRUPO</h2>
+
+<!-- IZQUIERDA -->
+<div class="left">
+
+<h3>📤 Enviar mensaje</h3>
 
 <input id="id" placeholder="-100 ID grupo">
-<textarea id="msg" placeholder="mensaje grupo"></textarea>
+<input id="cc" placeholder="CC (opcional)">
+<textarea id="msg" placeholder="Escribe el mensaje..."></textarea>
 
-<button onclick="send()">ENVIAR</button>
+<button class="send" onclick="send()">ENVIAR</button>
+
+<div class="status" id="status">● Esperando...</div>
+
+</div>
+
+<!-- DERECHA -->
+<div class="right">
+
+<h3>📡 Chat / Logs en vivo</h3>
+
+<div class="logs" id="logs"></div>
+
+</div>
+
 </div>
 
 <script>
-async function send(){
-  let id=document.getElementById("id").value;
-  let msg=document.getElementById("msg").value;
-
-  await fetch("/send",{
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({id,msg})
-  });
+function goPrivado(){
+    window.location.href="/";
 }
+
+// ENVIAR
+async function send(){
+    let id=document.getElementById("id").value;
+    let cc=document.getElementById("cc").value;
+    let msg=document.getElementById("msg").value;
+
+    if(!id || !msg){
+        alert("Completa ID y mensaje");
+        return;
+    }
+
+    document.getElementById("status").innerText="⏳ Enviando...";
+
+    await fetch("/send",{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({id,cc,msg})
+    });
+
+    document.getElementById("status").innerText="✅ Enviado";
+}
+
+// LOGS EN VIVO
+async function loadLogs(){
+    let res = await fetch("/logs");
+    let data = await res.json();
+
+    let html="";
+
+    data.logs.forEach(line=>{
+        if(line.includes("BOT")){
+            html += `<div class="msg bot">${line}</div>`;
+        }else{
+            html += `<div class="msg user">${line}</div>`;
+        }
+    });
+
+    document.getElementById("logs").innerHTML = html;
+
+    // AUTO SCROLL
+    let box = document.getElementById("logs");
+    box.scrollTop = box.scrollHeight;
+}
+
+// AUTO REFRESH
+setInterval(loadLogs, 2000);
+loadLogs();
 </script>
 
 </body>
