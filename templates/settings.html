@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>CONFIGURACIÓN</title>
+  <style>
+    body { margin:0; background:#0f0f0f; color:white; font-family:Arial; }
+    .top { background:#1a1a1a; padding:10px; display:flex; gap:10px; }
+    .btn { background:#333; color:white; border:0; padding:8px; cursor:pointer; }
+    .box { padding:15px; }
+    .card { background:#181818; padding:10px; margin:10px 0; border-radius:5px; }
+    input { width:100%; padding:8px; margin-top:5px; background:#222; color:white; border:0; }
+    button { margin-top:10px; }
+  </style>
+</head>
+<body>
+
+<div class="top">
+  <button class="btn" onclick="location.href='index.html'">Privados</button>
+  <button class="btn" onclick="location.href='grupo.html'">Grupos</button>
+  <button class="btn" onclick="location.href='dashboard.html'">Panel</button>
+</div>
+
+<div class="box">
+
+  <h2>⚙ CONFIGURACIÓN DEL SISTEMA</h2>
+
+  <div class="card">
+    <h3>🔑 Token del Bot</h3>
+    <input placeholder="Escribe tu token...">
+  </div>
+
+  <div class="card">
+    <h3>🌐 URL del Server</h3>
+    <input placeholder="http://localhost:5000">
+  </div>
+
+  <div class="card">
+    <h3>📡 Modo Logs</h3>
+    <input placeholder="ON / OFF">
+  </div>
+
+  <div class="card">
+    <h3>💀 Modo Tiempo Real</h3>
+    <input placeholder="true / false">
+  </div>
+
+  <button class="btn">Guardar cambios</button>
+
+</div>
+
+</body>
+</html>
