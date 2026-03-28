@@ -1,16 +1,28 @@
-TOKEN = "TU_TOKEN_AQUI"
+# 💀 MP SYSTEM CONFIG ULTRA
 
-# 🧠 ADMIN (opcional)
-ADMIN_ID = 123456789
+HOST = "0.0.0.0"
+PORT = 5000
+DEBUG = True
 
-# 📂 ARCHIVOS
-LOG_FILE = "logs.txt"
-CHATS_FILE = "chats.json"
-UPLOAD_FOLDER = "uploads"
+# 🔐 ADMIN LOGIN
+ADMIN_USER = "admin"
+ADMIN_PASS = "1234"
 
-# 🌐 WEB
-WEB_HOST = "0.0.0.0"
-WEB_PORT = 5000
+# 🔑 TOKEN GLOBAL MP SYSTEM
+API_TOKEN = "MP-ULTRA-KEY-2026-SECRET"
 
-# ⚠️ CAMBIA POR TU IP LOCAL
-BASE_URL = "http://10.207.112.28:5000"
+# 📡 SOCKET
+SOCKET_CORS = "*"
+
+# 👤 USERS
+USERS = {
+    "1": {"name": "Usuario A"},
+    "2": {"name": "Usuario B"},
+    "3": {"name": "Usuario C"}
+}
+
+# 💬 GROUPS
+GROUPS = {
+    "1": {"name": "Familia", "messages": []},
+    "2": {"name": "Clan Devs", "messages": []}
+}
