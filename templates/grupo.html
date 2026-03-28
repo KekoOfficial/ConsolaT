@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>CHAT GRUPO</title>
+
+<style>
+body{
+    margin:0;
+    font-family:Arial;
+    background:linear-gradient(135deg,#000,#1a1a1a);
+    color:white;
+}
+
+.container{
+    max-width:500px;
+    margin:50px auto;
+    padding:20px;
+    background:#111;
+    border-radius:15px;
+}
+
+h2{
+    text-align:center;
+    color:#ff0055;
+}
+
+input,textarea{
+    width:100%;
+    padding:12px;
+    margin:8px 0;
+    background:#222;
+    border:none;
+    border-radius:10px;
+    color:white;
+}
+
+button{
+    width:100%;
+    padding:12px;
+    background:#ff0055;
+    border:none;
+    border-radius:10px;
+    color:white;
+    font-weight:bold;
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+<h2>👥 GRUPO</h2>
+
+<input id="id" placeholder="-100 ID grupo">
+<textarea id="msg" placeholder="mensaje grupo"></textarea>
+
+<button onclick="send()">ENVIAR</button>
+</div>
+
+<script>
+async function send(){
+  let id=document.getElementById("id").value;
+  let msg=document.getElementById("msg").value;
+
+  await fetch("/send",{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({id,msg})
+  });
+}
+</script>
+
+</body>
+</html>
