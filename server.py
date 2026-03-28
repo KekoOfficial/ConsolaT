@@ -35,7 +35,7 @@ def save_log(text):
 
 def load_logs():
     if os.path.exists(LOG_FILE):
-        return open(LOG_FILE, encoding="utf-8").readlines()[-100:]
+        return open(LOG_FILE, encoding="utf-8").readlines()[-200:]
     return []
 
 # =========================
@@ -60,10 +60,15 @@ async def recibir(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not update.message:
         return
 
-    user = update.effective_user
     chat = update.effective_chat
 
-    name = user.first_name if user else "Grupo"
+    # NOMBRE
+    if chat.type in ["group", "supergroup"]:
+        name = chat.title
+    else:
+        user = update.effective_user
+        name = user.first_name if user else "Privado"
+
     msg = ""
 
     # TEXTO
@@ -99,36 +104,46 @@ async def recibir(update: Update, context: ContextTypes.DEFAULT_TYPE):
 tg_app.add_handler(MessageHandler(filters.ALL, recibir))
 
 # =========================
-# 📡 ENVIAR
+# 📡 ENVIAR (INSTANTÁNEO)
 # =========================
 
 async def send_async(data):
     try:
         chat_id = int(data["id"])
+        chats = load_chats()
+        name = chats.get(str(chat_id), "Desconocido")
 
         # TEXTO
         if data.get("msg"):
             await tg_app.bot.send_message(chat_id=chat_id, text=data["msg"])
 
+            line = f"{chat_id}|TÚ: {data['msg']}"
+            print(line)
+            save_log(line)
+
         # ARCHIVO
         if data.get("file"):
             url = BASE_URL + data["file"]
 
-            if url.endswith((".jpg",".png",".jpeg")):
+            if url.endswith((".jpg", ".png", ".jpeg")):
                 await tg_app.bot.send_photo(chat_id=chat_id, photo=url)
+                line = f"{chat_id}|TÚ: [FOTO] {url}"
 
             elif url.endswith(".mp4"):
                 await tg_app.bot.send_video(chat_id=chat_id, video=url)
+                line = f"{chat_id}|TÚ: [VIDEO] {url}"
 
-        print(f"🤖 enviado a {chat_id}")
+            print(line)
+            save_log(line)
 
     except Exception as e:
         print("❌ ERROR:", e)
 
+# ENDPOINT SEND (SIN RETRASO)
 @app.route("/send", methods=["POST"])
-def send():
+async def send():
     data = request.json
-    threading.Thread(target=lambda: asyncio.run(send_async(data))).start()
+    await send_async(data)
     return jsonify({"status": "ok"})
 
 # =========================
@@ -190,7 +205,7 @@ async def bot_run():
         await asyncio.sleep(10)
 
 # =========================
-# 🚀 MAIN
+# 🚀 MAIN (1 TERMINAL)
 # =========================
 
 def run_web():
