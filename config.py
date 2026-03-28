@@ -1,56 +1,45 @@
-from dataclasses import dataclass, field
-from typing import Dict, List
-
+# 💀 MP SYSTEM CLEAN CONFIG (FIXED + STABLE)
 
 # 🌐 SERVER
-@dataclass
-class ServerConfig:
-    host: str = "0.0.0.0"
-    port: int = 5000
-    debug: bool = True
-
+HOST = "0.0.0.0"
+PORT = 5000
+DEBUG = True
 
 # 🔐 AUTH
-@dataclass
-class AuthConfig:
-    admin_user: str = "admin"
-    admin_pass: str = "1234"
-    api_token: str = "8367475601:AAExk4xLECpm1wqTlJUeAyfzKhxMq7msHio"
+ADMIN_USER = "admin"
+ADMIN_PASS = "1234"
 
+# 🔑 API TOKEN
+API_TOKEN = "8367475601:AAExk4xLECpm1wqTlJUeAyfzKhxMq7msHio"
 
 # 📡 SOCKET
-@dataclass
-class SocketConfig:
-    cors: str = "*"
-
+SOCKET_CORS = "*"
 
 # 👤 USERS
-@dataclass
-class UserConfig:
-    users: Dict[str, dict] = field(default_factory=lambda: {
-        "1": {"name": "Usuario A"},
-        "2": {"name": "Usuario B"},
-        "3": {"name": "Usuario C"}
-    })
-
+USERS = {
+    "1": {"name": "Usuario A"},
+    "2": {"name": "Usuario B"},
+    "3": {"name": "Usuario C"}
+}
 
 # 💬 GROUPS
-@dataclass
-class GroupConfig:
-    groups: Dict[str, dict] = field(default_factory=lambda: {
-        "1": {"name": "Familia", "members": ["1", "2"], "messages": []},
-        "2": {"name": "Clan Devs", "members": ["2", "3"], "messages": []}
-    })
+GROUPS = {
+    "1": {
+        "name": "Familia",
+        "members": ["1", "2"],
+        "messages": []
+    },
+    "2": {
+        "name": "Clan Devs",
+        "members": ["2", "3"],
+        "messages": []
+    }
+}
 
+# ⚡ PERFORMANCE
+MAX_LOGS = 200
+MAX_MESSAGES = 1000
 
-# 💀 MASTER CONFIG
-@dataclass
-class Config:
-    server: ServerConfig = field(default_factory=ServerConfig)
-    auth: AuthConfig = field(default_factory=AuthConfig)
-    socket: SocketConfig = field(default_factory=SocketConfig)
-    users: UserConfig = field(default_factory=UserConfig)
-    groups: GroupConfig = field(default_factory=GroupConfig)
-
-
-config = Config()
+# 🔥 SECURITY
+REQUIRE_TOKEN = True
+ALLOW_GUESTS = False
