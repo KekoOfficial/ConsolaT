@@ -8,21 +8,32 @@
     .btn{background:#333;color:#fff;border:0;padding:8px;cursor:pointer}
     .list{padding:10px}
     .group{background:#181818;margin:10px 0;padding:10px;cursor:pointer}
+    .group:hover{background:#252525}
+    a{text-decoration:none;color:inherit}
   </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
 </head>
 <body>
+<script>
+  const socket = io();
+  socket.on('update', function(data) {
+    console.log("Grupo actualizado:", data);
+  });
+</script>
 
 <div class="top">
-  <button class="btn" onclick="location.href='index.html'">Privados</button>
-  <button class="btn" onclick="location.href='dashboard.html'">Panel</button>
+  <button class="btn" onclick="location.href='/'">Privados</button>
+  <button class="btn" onclick="location.href='/dashboard'">Panel</button>
 </div>
 
 <h2 style="padding:10px;">💬 Grupos</h2>
 
 <div class="list">
-  <div class="group">🔥 Grupo Familia (ID: 1)</div>
-  <div class="group">💀 Clan Devs (ID: 2)</div>
-  <div class="group">🎮 Gaming (ID: 3)</div>
+  {% for id, group in groups.items() %}
+  <a href="/chat?id={{id}}&name={{group.name}}&type=group">
+    <div class="group">🔥 {{group.name}} (ID: {{id}})</div>
+  </a>
+  {% endfor %}
 </div>
 
 </body>

@@ -2,27 +2,55 @@
 <html>
 <head>
   <title>ENVIAR MENSAJE</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
   <style>
     body{background:#0f0f0f;color:#fff;font-family:Arial;margin:0}
     .top{background:#1a1a1a;padding:10px;display:flex;gap:10px}
     .btn{background:#333;color:#fff;border:0;padding:8px;cursor:pointer}
     .box{padding:15px}
-    input, textarea{width:100%;padding:10px;margin-top:10px;background:#222;color:#fff;border:0}
+    input, textarea{width:100%;padding:10px;margin-top:10px;background:#222;color:#fff;border:0;box-sizing:border-box}
   </style>
 </head>
 <body>
 
 <div class="top">
-  <button class="btn" onclick="location.href='index.html'">Privados</button>
-  <button class="btn" onclick="location.href='grupo.html'">Grupos</button>
+  <button class="btn" onclick="location.href='/'">Privados</button>
+  <button class="btn" onclick="location.href='/grupo'">Grupos</button>
 </div>
 
 <div class="box">
-  <h2>📤 Enviar mensaje</h2>
-  <input placeholder="ID del chat o grupo">
-  <textarea placeholder="Mensaje..."></textarea>
-  <button class="btn">Enviar</button>
+  <h2>📤 Enviar mensaje rápido</h2>
+  <input id="chat-id" placeholder="ID del chat o grupo (ej: 1)">
+  <textarea id="message-text" placeholder="Mensaje..." rows="5"></textarea>
+  <button class="btn" onclick="sendQuickMessage()" style="width:100%; margin-top:10px; background:#444">Enviar ahora</button>
+  <p id="status" style="margin-top:10px; color:#0f0"></p>
 </div>
+
+<script>
+  const socket = io();
+
+  function sendQuickMessage() {
+    const chatId = document.getElementById('chat-id').value;
+    const text = document.getElementById('message-text').value;
+    const status = document.getElementById('status');
+
+    if(!chatId || !text) {
+      alert("Faltan campos");
+      return;
+    }
+
+    socket.emit('message', {
+      chat_id: chatId,
+      text: text,
+      sender: "System Quick"
+    });
+
+    status.innerText = "✅ Mensaje enviado a la cola del sistema";
+    document.getElementById('message-text').value = "";
+
+    setTimeout(() => { status.innerText = ""; }, 3000);
+  }
+</script>
 
 </body>
 </html>

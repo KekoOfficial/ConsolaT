@@ -63,20 +63,28 @@
   <input id="user" placeholder="Usuario">
   <input id="pass" type="password" placeholder="Contraseña">
 
-  <button onclick="login()">Entrar</button>
+  <button onclick="doLogin()">Entrar</button>
 
   <div class="msg" id="msg"></div>
 </div>
 
 <script>
-function login() {
+async function doLogin() {
   let u = document.getElementById("user").value;
   let p = document.getElementById("pass").value;
 
-  if(u === "admin" && p === "1234") {
-    window.location.href = "dashboard.html";
+  const response = await fetch("/api/login", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ user: u, password: p })
+  });
+
+  const data = await response.json();
+
+  if(data.status === "success") {
+    window.location.href = "/dashboard";
   } else {
-    document.getElementById("msg").innerText = "❌ Acceso denegado";
+    document.getElementById("msg").innerText = "❌ " + data.message;
   }
 }
 </script>

@@ -8,21 +8,33 @@
     .btn{background:#333;color:#fff;border:0;padding:8px;cursor:pointer}
     .list{padding:10px}
     .chat{background:#181818;margin:10px 0;padding:10px;cursor:pointer}
+    .chat:hover{background:#252525}
+    a{text-decoration:none;color:inherit}
   </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
 </head>
 <body>
+<script>
+  const socket = io();
+  socket.on('update', function(data) {
+    console.log("Sistema actualizado:", data);
+  });
+</script>
 
 <div class="top">
-  <button class="btn" onclick="location.href='grupo.html'">Grupos</button>
-  <button class="btn" onclick="location.href='dashboard.html'">Panel</button>
+  <button class="btn" onclick="location.href='/grupo'">Grupos</button>
+  <button class="btn" onclick="location.href='/dashboard'">Panel</button>
+  <button class="btn" onclick="location.href='/logout'" style="margin-left:auto; background:#633">Salir</button>
 </div>
 
 <h2 style="padding:10px;">💬 Chats Privados</h2>
 
 <div class="list">
-  <div class="chat">👤 Usuario A (ID: 1)</div>
-  <div class="chat">👤 Usuario B (ID: 2)</div>
-  <div class="chat">👤 Usuario C (ID: 3)</div>
+  {% for id, user in users.items() %}
+  <a href="/chat?id={{id}}&name={{user.name}}">
+    <div class="chat">👤 {{user.name}} (ID: {{id}})</div>
+  </a>
+  {% endfor %}
 </div>
 
 </body>

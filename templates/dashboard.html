@@ -13,19 +13,21 @@
 <body>
 
 <div class="top">
-  <button class="btn" onclick="location.href='index.html'">Privados</button>
-  <button class="btn" onclick="location.href='grupo.html'">Grupos</button>
-  <button class="btn" onclick="location.href='logs.html'">Logs</button>
+  <button class="btn" onclick="location.href='/'">Privados</button>
+  <button class="btn" onclick="location.href='/grupo'">Grupos</button>
+  <button class="btn" onclick="location.href='/logs'">Logs</button>
+  <button class="btn" onclick="location.href='/settings'">Config</button>
+  <button class="btn" onclick="location.href='/users_list'">Usuarios</button>
 </div>
 
 <div class="box">
 
   <h2>📊 Dashboard</h2>
 
-  <div class="card">💬 Chats activos: 12</div>
-  <div class="card">👤 Usuarios: 5</div>
+  <div class="card">💬 Grupos configurados: {{ groups_count }}</div>
+  <div class="card">👤 Usuarios en sistema: {{ users_count }}</div>
   <div class="card">📡 Estado: ONLINE</div>
-  <div class="card">⚙ Sistema: OK</div>
+  <div class="card">⚙ Host: {{ host }}:{{ port }}</div>
 
 </div>
 

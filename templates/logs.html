@@ -5,21 +5,32 @@
   <style>
     body{background:#0f0f0f;color:#0f0;font-family:monospace;margin:0}
     .top{background:#111;padding:10px}
-    .btn{background:#333;color:#fff;border:0;padding:8px}
-    .log{padding:10px;height:90vh;overflow:auto}
+    .btn{background:#333;color:#fff;border:0;padding:8px;cursor:pointer}
+    .log-container{padding:10px;height:90vh;overflow:auto}
   </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
 </head>
 <body>
+<script>
+  const socket = io();
+  socket.on('log', function(data) {
+    const container = document.getElementById('logs');
+    const div = document.createElement('div');
+    div.innerText = "[" + data.time + "] " + data.msg;
+    container.insertBefore(div, container.firstChild);
+  });
+</script>
 
 <div class="top">
-  <button class="btn" onclick="location.href='dashboard.html'">Panel</button>
+  <button class="btn" onclick="location.href='/dashboard'">Panel</button>
 </div>
 
-<div class="log">
-[INFO] Sistema iniciado<br>
-[CHAT] Mensaje recibido<br>
-[USER] Usuario conectado<br>
-[GROUP] Grupo activo<br>
+<div class="log-container" id="logs">
+  {% for log in logs %}
+  <div>[{{ log.time }}] {{ log.msg }}</div>
+  {% else %}
+  <div>[INFO] No hay logs recientes.</div>
+  {% endfor %}
 </div>
 
 </body>

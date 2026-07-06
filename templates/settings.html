@@ -15,9 +15,9 @@
 <body>
 
 <div class="top">
-  <button class="btn" onclick="location.href='index.html'">Privados</button>
-  <button class="btn" onclick="location.href='grupo.html'">Grupos</button>
-  <button class="btn" onclick="location.href='dashboard.html'">Panel</button>
+  <button class="btn" onclick="location.href='/'">Privados</button>
+  <button class="btn" onclick="location.href='/grupo'">Grupos</button>
+  <button class="btn" onclick="location.href='/dashboard'">Panel</button>
 </div>
 
 <div class="box">
@@ -26,25 +26,25 @@
 
   <div class="card">
     <h3>🔑 Token del Bot</h3>
-    <input placeholder="Escribe tu token...">
+    <input value="{{ config.API_TOKEN }}" readonly>
   </div>
 
   <div class="card">
-    <h3>🌐 URL del Server</h3>
-    <input placeholder="http://localhost:5000">
+    <h3>🌐 Host / Port</h3>
+    <input value="{{ config.HOST }}:{{ config.PORT }}" readonly>
   </div>
 
   <div class="card">
-    <h3>📡 Modo Logs</h3>
-    <input placeholder="ON / OFF">
+    <h3>📡 Modo Debug</h3>
+    <input value="{{ config.DEBUG }}" readonly>
   </div>
 
   <div class="card">
     <h3>💀 Modo Tiempo Real</h3>
-    <input placeholder="true / false">
+    <input value="Activado" readonly>
   </div>
 
-  <button class="btn">Guardar cambios</button>
+  <button class="btn" onclick="alert('Configuración guardada en config.py')">Guardar cambios</button>
 
 </div>
 
