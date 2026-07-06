@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block title %}Login - Enterprise MP{% endblock %}
+
+{% block content %}
+<div class="card auth-box">
+    <h2 style="text-align: center;">🔐 Acceso Corporativo</h2>
+    <form method="POST">
+        <div style="margin-bottom: 1rem;">
+            <label>Usuario</label>
+            <input name="username" placeholder="Tu usuario" required>
+        </div>
+        <div style="margin-bottom: 1rem;">
+            <label>Contraseña</label>
+            <input name="password" type="password" placeholder="••••••••" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Entrar al Sistema</button>
+    </form>
+</div>
+{% endblock %}

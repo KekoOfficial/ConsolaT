@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Enterprise MP System{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/enterprise.css') }}">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    {% block head %}{% endblock %}
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="{{ url_for('main.dashboard') }}" class="brand">🚀 ENTERPRISE MP</a>
+            <div class="nav-links">
+                {% if current_user.is_authenticated %}
+                    <a href="{{ url_for('main.index') }}">Privados</a>
+                    <a href="{{ url_for('main.grupo') }}">Grupos</a>
+                    <a href="{{ url_for('main.logs') }}">Logs</a>
+                    <a href="{{ url_for('main.settings') }}">Config</a>
+                    <a href="{{ url_for('auth.logout') }}" class="btn-logout">Salir</a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <main class="content">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div class="alert alert-{{ category }}">{{ message }}</div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2026 Enterprise Messaging Solutions - Secure & Stable</p>
+    </footer>
+
+    <script>
+        const socket = io();
+        socket.on('status', (data) => console.log('Socket:', data.message));
+    </script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

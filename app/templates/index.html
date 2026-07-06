@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block title %}Privados - Enterprise MP{% endblock %}
+
+{% block content %}
+<h2>💬 Gestión de Chats Privados</h2>
+
+<div class="list">
+    {% for id, user in users.items() %}
+    <div class="card" style="display: flex; justify-content: space-between; align-items: center;">
+        <div>
+            <strong>👤 {{ user.name }}</strong> (ID: {{ id }})
+        </div>
+        <a href="/chat?id={{id}}&name={{user.name}}" class="btn">Abrir Conversación</a>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

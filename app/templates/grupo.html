@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block title %}Grupos - Enterprise MP{% endblock %}
+
+{% block content %}
+<h2>💬 Gestión de Grupos Empresariales</h2>
+
+<div class="list">
+    {% for id, group in groups.items() %}
+    <div class="card" style="display: flex; justify-content: space-between; align-items: center;">
+        <div>
+            <strong>🔥 {{ group.name }}</strong> (ID: {{ id }})
+            <p style="margin: 4px 0 0; font-size: 0.9rem; opacity: 0.7;">Miembros: {{ group.members | length }}</p>
+        </div>
+        <a href="/chat?id={{id}}&name={{group.name}}&type=group" class="btn">Abrir Grupo</a>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}
