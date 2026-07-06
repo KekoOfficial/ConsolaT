@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block title %}Usuarios - Enterprise MP{% endblock %}
+
+{% block content %}
+<h2>👤 Directorio de Usuarios</h2>
+
+<div class="card" style="padding: 0; overflow: hidden;">
+    <table style="width: 100%; border-collapse: collapse;">
+        <thead style="background: var(--nav-bg);">
+            <tr>
+                <th style="padding: 1rem; text-align: left; border-bottom: 1px solid var(--border-color);">ID</th>
+                <th style="padding: 1rem; text-align: left; border-bottom: 1px solid var(--border-color);">Nombre Completo</th>
+                <th style="padding: 1rem; text-align: right; border-bottom: 1px solid var(--border-color);">Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for id, user in users.items() %}
+            <tr>
+                <td style="padding: 1rem; border-bottom: 1px solid var(--border-color); font-family: monospace;">{{ id }}</td>
+                <td style="padding: 1rem; border-bottom: 1px solid var(--border-color);">{{ user.name }}</td>
+                <td style="padding: 1rem; border-bottom: 1px solid var(--border-color); text-align: right;">
+                    <a href="/chat?id={{id}}&name={{user.name}}" class="btn" style="padding: 0.3rem 0.8rem; font-size: 0.85rem;">Mensaje</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

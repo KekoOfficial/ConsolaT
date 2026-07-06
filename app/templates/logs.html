@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block title %}Logs de Auditoría - Enterprise MP{% endblock %}
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+    <h2>📝 Auditoría del Sistema</h2>
+    <button class="btn" onclick="location.reload()">Refrescar</button>
+</div>
+
+<div class="card" style="padding: 0; overflow: hidden;">
+    <table style="width: 100%; border-collapse: collapse; background: var(--card-bg);">
+        <thead style="background: var(--nav-bg);">
+            <tr>
+                <th style="padding: 1rem; text-align: left; border-bottom: 1px solid var(--border-color);">Hora</th>
+                <th style="padding: 1rem; text-align: left; border-bottom: 1px solid var(--border-color);">Evento</th>
+            </tr>
+        </thead>
+        <tbody id="logs-body">
+            {% for log in logs %}
+            <tr>
+                <td style="padding: 0.8rem 1rem; border-bottom: 1px solid var(--border-color); color: var(--accent-color); font-family: monospace;">
+                    {{ log.timestamp.strftime('%H:%M:%S') }}
+                </td>
+                <td style="padding: 0.8rem 1rem; border-bottom: 1px solid var(--border-color);">
+                    {{ log.event }}
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="2" style="padding: 2rem; text-align: center; opacity: 0.5;">No hay registros de auditoría disponibles.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    socket.on('log', function(data) {
+        const tbody = document.getElementById('logs-body');
+        const row = tbody.insertRow(0);
+        row.innerHTML = `
+            <td style="padding: 0.8rem 1rem; border-bottom: 1px solid var(--border-color); color: var(--accent-color); font-family: monospace;">${data.time}</td>
+            <td style="padding: 0.8rem 1rem; border-bottom: 1px solid var(--border-color);">${data.msg}</td>
+        `;
+    });
+</script>
+{% endblock %}

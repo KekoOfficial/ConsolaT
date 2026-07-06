@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block title %}Configuración - Enterprise MP{% endblock %}
+
+{% block content %}
+<h2>⚙ Configuración del Gateway</h2>
+
+<div class="grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 1.5rem;">
+    <div class="card">
+        <h3>📡 Conectividad</h3>
+        <div style="margin-top: 1rem;">
+            <label style="font-size: 0.85rem; opacity: 0.7;">HOST</label>
+            <input value="{{ config.HOST }}" readonly>
+        </div>
+        <div style="margin-top: 1rem;">
+            <label style="font-size: 0.85rem; opacity: 0.7;">PUERTO</label>
+            <input value="{{ config.PORT }}" readonly>
+        </div>
+    </div>
+
+    <div class="card">
+        <h3>🔐 Seguridad</h3>
+        <div style="margin-top: 1rem;">
+            <label style="font-size: 0.85rem; opacity: 0.7;">TOKEN API (Auditado)</label>
+            <input value="••••••••••••••••••••••••" readonly>
+        </div>
+        <div style="margin-top: 1rem;">
+            <label style="font-size: 0.85rem; opacity: 0.7;">CIFRADO</label>
+            <input value="PBKDF2-SHA256" readonly>
+        </div>
+    </div>
+</div>
+
+<div class="card" style="margin-top: 1.5rem;">
+    <h3>📊 Límites del Sistema</h3>
+    <div style="display: flex; gap: 2rem; margin-top: 1rem;">
+        <div>
+            <strong>Max Logs:</strong> {{ config.MAX_LOGS }}
+        </div>
+        <div>
+            <strong>Max Messages:</strong> {{ config.MAX_MESSAGES }}
+        </div>
+    </div>
+</div>
+
+<div style="margin-top: 2rem; text-align: right;">
+    <button class="btn btn-primary" style="width: auto; padding: 0.8rem 2.5rem;" onclick="alert('Los cambios de configuración requieren acceso a nivel de servidor (config.py).')">Solicitar Cambios</button>
+</div>
+{% endblock %}
