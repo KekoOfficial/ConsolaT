@@ -24,6 +24,15 @@
                 </td>
             </tr>
             {% endfor %}
+            {% for user in db_users %}
+            <tr style="background: rgba(0, 122, 255, 0.05);">
+                <td style="padding: 1rem; border-bottom: 1px solid var(--border-color); font-family: monospace;">DB_{{ user.id }}</td>
+                <td style="padding: 1rem; border-bottom: 1px solid var(--border-color);">{{ user.username }} (Admin)</td>
+                <td style="padding: 1rem; border-bottom: 1px solid var(--border-color); text-align: right;">
+                    <span class="badge" style="background: var(--success); font-size: 0.7rem;">ADMIN</span>
+                </td>
+            </tr>
+            {% endfor %}
         </tbody>
     </table>
 </div>

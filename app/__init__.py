@@ -9,7 +9,7 @@ login_manager = LoginManager()
 
 def create_app():
     flask_app = Flask(__name__)
-    flask_app.config["SECRET_KEY"] = "enterprise-secure-session-key-2026"
+    flask_app.config["SECRET_KEY"] = config.SECRET_KEY
     flask_app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///enterprise.db"
     flask_app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 

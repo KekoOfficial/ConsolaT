@@ -1,9 +1,49 @@
-from flask import Blueprint, render_template
+from flask import Blueprint, render_template, request, jsonify
 from flask_login import login_required
-from app.models.database import AuditLog, ChatGroup, User
+from app.models.database import db, AuditLog, ChatGroup, User, Message
+from app import socketio
 import config
+from datetime import datetime
 
 main = Blueprint("main", __name__)
+
+@main.route("/webhook", methods=["POST"])
+def webhook():
+    data = request.get_json()
+    if not data:
+        return jsonify({"status": "error", "message": "No data received"}), 400
+
+    # Log the update for debugging
+    # print(f"Received update: {data}")
+
+    if "message" in data:
+        message = data["message"]
+        chat_id = str(message["chat"]["id"])
+        text = message.get("text", "")
+        sender = message["from"].get("username") or message["from"].get("first_name") or "Unknown"
+
+        # Save to DB
+        new_msg = Message(chat_id=chat_id, text=text, sender=sender)
+        db.session.add(new_msg)
+
+        log_entry = AuditLog(event=f"Webhook: Mensaje recibido de {sender} en {chat_id}: {text[:50]}")
+        db.session.add(log_entry)
+        db.session.commit()
+
+        # Emit via Socket.IO
+        socketio.emit("message", {
+            "chat_id": chat_id,
+            "text": text,
+            "sender": sender,
+            "time": datetime.now().strftime("%H:%M:%S")
+        })
+
+        socketio.emit("log", {
+            "time": datetime.now().strftime("%H:%M:%S"),
+            "msg": f"Entrante: {sender}: {text[:50]}"
+        })
+
+    return jsonify({"status": "ok"}), 200
 
 @main.route("/")
 @login_required
@@ -45,4 +85,6 @@ def settings():
 @main.route("/users_list")
 @login_required
 def users_list():
-    return render_template("users.html", users=config.USERS)
+    # Show both config users (hardcoded) and database users (admins)
+    db_users = User.query.all()
+    return render_template("users.html", users=config.USERS, db_users=db_users)

@@ -41,5 +41,6 @@ MAX_LOGS = 200
 MAX_MESSAGES = 1000
 
 # 🔥 SECURITY
+SECRET_KEY = "enterprise-secure-session-key-2026"
 REQUIRE_TOKEN = True
 ALLOW_GUESTS = False
